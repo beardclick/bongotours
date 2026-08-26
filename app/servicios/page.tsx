@@ -4,6 +4,7 @@ import { Footer } from '../ui/footer';
 import { WhatsApp } from '../ui/whatsapp';
 import { SiteLink as Link } from '../ui/site-link';
 import { getAllServices } from '../lib/services';
+import { getPageConfig } from '../lib/site-config';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -18,10 +19,10 @@ function priceLabel(price: number, type: string) {
 }
 
 export default async function Servicios() {
-  const services = await getAllServices();
+  const [services,hero] = await Promise.all([getAllServices(),getPageConfig('services')]);
   return <main>
     <Header />
-    <section className="page-hero page-hero--image"><div className="shell"><p className="eyebrow eyebrow--light"><span /> Complementa la aventura</p><h1>Servicios que hacen el viaje más fácil.</h1></div></section>
+    <section className="page-hero page-hero--image" style={hero.image?{backgroundImage:`linear-gradient(132deg,rgba(8,13,13,.85),rgba(20,33,31,.72)),url(${hero.image})`}:undefined}><div className="shell"><p className="eyebrow eyebrow--light"><span /> {hero.eyebrow}</p><h1>{hero.title}</h1>{hero.description&&<p>{hero.description}</p>}<div className="hero__actions">{hero.buttons.map((b,i)=><Link key={i} className="button button--primary" href={b.url}>{b.label}</Link>)}</div></div></section>
     <section className="section shell"><div className="service-grid">{services.map((service, index) => <article key={service.slug}>
       <Link className="service-card__image" href={`/servicios/${service.slug}`} aria-label={`Ver ${service.name}`}><img src={service.image} alt={service.name} /></Link>
       <span>{['◌','↝','◎'][index % 3]}</span>

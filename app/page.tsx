@@ -1,27 +1,30 @@
 import { SiteLink as Link } from './ui/site-link';
 import { Header } from './ui/header';
-import { categories, tours } from './data';
+import { categories } from './data';
+import { getTours } from './lib/tours';
+import { getPageConfig } from './lib/site-config';
 import { Footer } from './ui/footer';
 import { FaqList } from './ui/faq-list';
 import { WhatsApp } from './ui/whatsapp';
 import { TourCard } from './ui/tour-card';
 
-export default function Home() {
+export const dynamic='force-dynamic';
+export default async function Home() {
+  const [tours,hero]=await Promise.all([getTours(),getPageConfig('home')]);
   return (
     <main>
       <Header transparent />
-      <section className="hero" aria-labelledby="hero-title">
+      <section className="hero" aria-labelledby="hero-title" style={{backgroundImage:`url(${hero.image})`}}>
         <div className="hero__shade" />
         <div className="hero__content shell">
-          <p className="eyebrow eyebrow--light"><span /> Tours auténticos en Panamá</p>
-          <h1 id="hero-title">La aventura empieza donde termina la rutina.</h1>
-          <p>Explora volcanes, islas y bosques con guías locales que conocen cada rincón de Chiriquí.</p>
+          <p className="eyebrow eyebrow--light"><span /> {hero.eyebrow}</p>
+          <h1 id="hero-title">{hero.title}</h1>
+          <p>{hero.description}</p>
           <div className="hero__actions">
-            <Link className="button button--primary" href="#tours">Explorar tours <b>↗</b></Link>
-            <Link className="button button--glass" href="/contacto">Diseña tu aventura</Link>
+            {hero.buttons.map((button,index)=><Link key={`${button.label}-${index}`} className={`button ${button.style==='glass'?'button--glass':'button--primary'}`} href={button.url}>{button.label}{button.style!=='glass'&&<b>↗</b>}</Link>)}
           </div>
         </div>
-        <div className="hero__meta shell"><span>08° 46′ N</span><span>Chiriquí, Panamá</span><span>Desde 2013</span></div>
+        <div className="hero__meta shell">{hero.meta.map(item=><span key={item}>{item}</span>)}</div>
       </section>
 
       <section className="section shell" id="tours">
