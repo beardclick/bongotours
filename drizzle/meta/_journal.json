@@ -15,6 +15,13 @@
       "when": 1787719929593,
       "tag": "0001_blue_taskmaster",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787722034018,
+      "tag": "0002_slim_kid_colt",
+      "breakpoints": true
     }
   ]
 }
