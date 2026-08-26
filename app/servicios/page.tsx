@@ -1,4 +1,35 @@
-import type { Metadata } from 'next';import { Header } from '../ui/header';import { Footer } from '../ui/footer';import { WhatsApp } from '../ui/whatsapp';import { getServices } from '../lib/content';
-export const dynamic='force-dynamic';export const metadata:Metadata={title:'Servicios: drones y shuttle',description:'Fotografía y video con drones, shuttle privado y servicios para complementar tu aventura en Panamá.'};
-const defaults=[{id:'drones',icon:'◌',name:'Fotografía y video con drones',description:'Tomas aéreas profesionales para parejas, grupos, hoteles y producciones. Pilotos responsables y edición disponible.',priceLabel:'Desde $180 / servicio'},{id:'shuttle',icon:'↝',name:'Shuttle Panamá',description:'Traslados privados entre aeropuertos, Boquete, David, Boca Chica, Pedasí y otros destinos.',priceLabel:'Cotización según ruta'},{id:'fotografia',icon:'◎',name:'Fotografía de aventura',description:'Documenta la experiencia sin preocuparte por la cámara. Entrega digital seleccionada y editada.',priceLabel:'Desde $65 / grupo'}];
-export default async function Servicios(){const rows=await getServices() as Array<{slug:string;name:string;description:string;price:number;price_type:string}>;const services=[...rows.map(r=>({id:r.slug,icon:'✦',name:r.name,description:r.description,priceLabel:`Desde $${r.price} / ${r.price_type}`})),...defaults];return <main><Header/><section className="page-hero page-hero--image"><div className="shell"><p className="eyebrow eyebrow--light"><span/> Complementa la aventura</p><h1>Servicios que hacen el viaje más fácil.</h1></div></section><section className="section shell"><div className="service-grid">{services.map(s=><article id={s.id} key={s.id}><span>{s.icon}</span><h2>{s.name}</h2><p>{s.description}</p><b>{s.priceLabel}</b><a className="button" href={`https://wa.me/50764467276?text=${encodeURIComponent(`Hola Bongo Outdoors, me interesa: ${s.name}`)}`} target="_blank">Cotizar por WhatsApp</a></article>)}</div></section><Footer/><WhatsApp/></main>}
+import type { Metadata } from 'next';
+import { Header } from '../ui/header';
+import { Footer } from '../ui/footer';
+import { WhatsApp } from '../ui/whatsapp';
+import { SiteLink as Link } from '../ui/site-link';
+import { getAllServices } from '../lib/services';
+
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Servicios: drones, fotografía y shuttle',
+  description: 'Fotografía y video con drones, shuttle privado y servicios para complementar tu aventura en Panamá.',
+};
+
+function priceLabel(price: number, type: string) {
+  if (!price) return 'Cotización personalizada';
+  const unit = type === 'person' ? 'persona' : type === 'group' ? 'grupo' : 'servicio';
+  return `Desde $${price.toFixed(2)} / ${unit}`;
+}
+
+export default async function Servicios() {
+  const services = await getAllServices();
+  return <main>
+    <Header />
+    <section className="page-hero page-hero--image"><div className="shell"><p className="eyebrow eyebrow--light"><span /> Complementa la aventura</p><h1>Servicios que hacen el viaje más fácil.</h1></div></section>
+    <section className="section shell"><div className="service-grid">{services.map((service, index) => <article key={service.slug}>
+      <Link className="service-card__image" href={`/servicios/${service.slug}`} aria-label={`Ver ${service.name}`}><img src={service.image} alt={service.name} /></Link>
+      <span>{['◌','↝','◎'][index % 3]}</span>
+      <h2><Link href={`/servicios/${service.slug}`}>{service.name}</Link></h2>
+      <p>{service.description}</p>
+      <b>{priceLabel(service.price, service.priceType)}</b>
+      <Link className="button" href={`/servicios/${service.slug}`}>Ver servicio <b>→</b></Link>
+    </article>)}</div></section>
+    <Footer /><WhatsApp />
+  </main>;
+}

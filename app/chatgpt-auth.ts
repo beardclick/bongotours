@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { env } from 'cloudflare:workers';
 
 export type ChatGPTUser = {
   userId: string;
@@ -46,6 +47,20 @@ export async function requireChatGPTUser(
   if (user) return user;
 
   redirect(chatGPTSignInPath(returnTo));
+}
+
+export function isAdminEmail(email: string): boolean {
+  const runtimeEnv = env as unknown as Record<string, unknown>;
+  const configured = String(runtimeEnv.ADMIN_EMAILS ?? process.env.ADMIN_EMAILS ?? '');
+  const allowed = configured.split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
+  if (process.env.NODE_ENV !== 'production' && email.toLowerCase().endsWith('@sites.test')) return true;
+  return allowed.includes(email.trim().toLowerCase());
+}
+
+export async function requireChatGPTAdmin(returnTo = '/admin'): Promise<ChatGPTUser> {
+  const user = await requireChatGPTUser(returnTo);
+  if (isAdminEmail(user.email)) return user;
+  redirect('/cuenta?admin=denied');
 }
 
 export function chatGPTSignInPath(returnTo: string): string {
