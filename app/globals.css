@@ -79,8 +79,10 @@ img { max-width:100%; display:block; }
 .season-note{margin:-6px 0 14px;padding:10px 12px;border-radius:9px;background:#fff8e9;color:#9b6412;font-size:11px;font-weight:800}
 
 /* Refinamientos de navegación, tarjetas, reservas y páginas individuales */
-.page-hero--green{background:linear-gradient(125deg,var(--blue) 0%,#087f91 35%,#23bbaa 72%,var(--green) 125%)}
-.page-hero--cream{background:linear-gradient(125deg,#f5faf7 0%,#e7faf5 62%,#e9f2e4 100%)}
+.page-hero--green{background:linear-gradient(132deg,#080d0d 0%,#13211f 48%,#25312e 100%)}
+.page-hero--cream{background:linear-gradient(132deg,#090d0d 0%,#18211f 52%,#2b3431 100%);color:#fff}
+.page-hero--cream .eyebrow{color:var(--mint)}
+.page-hero--green p:not(.eyebrow),.page-hero--cream p:not(.eyebrow){color:rgba(255,255,255,.78)}
 .tour-card__tag{background:var(--blue);color:#fff;box-shadow:0 7px 22px rgba(0,55,67,.22)}
 .tour-card__tag--bike{background:var(--mint);color:#093d3a}
 .tour-card__location{display:flex;align-items:center;gap:7px;font-size:12px}
@@ -96,7 +98,7 @@ img { max-width:100%; display:block; }
 .tour-card__footer strong{font-size:20px}
 .tour-card__footer>a{font-size:20px;transition:.2s}
 .tour-card__footer>a:hover{background:var(--blue);transform:translateX(2px)}
-.tour-hero__shade{background:linear-gradient(0deg,rgba(5,25,20,.9),rgba(0,60,72,.3) 58%,rgba(5,25,20,.42))}
+.tour-hero__shade{background:linear-gradient(0deg,rgba(5,10,10,.94),rgba(13,22,21,.3) 58%,rgba(5,10,10,.52))}
 .tour-hero__actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .share-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .share-actions>span{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
@@ -114,7 +116,7 @@ img { max-width:100%; display:block; }
 .stay-hero{position:relative;min-height:600px;display:flex;align-items:flex-end;color:#fff;padding:150px 0 70px}
 .stay-hero__image,.stay-hero__image:after{position:absolute;inset:0}
 .stay-hero__image img{width:100%;height:100%;object-fit:cover}
-.stay-hero__image:after{content:"";background:linear-gradient(0deg,rgba(5,25,20,.9),rgba(0,80,93,.12) 70%)}
+.stay-hero__image:after{content:"";background:linear-gradient(0deg,rgba(5,10,10,.94),rgba(12,20,19,.2) 70%)}
 .stay-hero__content{position:relative}
 .stay-hero h1{max-width:900px;font-size:clamp(45px,6vw,76px);line-height:1.03;letter-spacing:-.05em;margin:18px 0 0}
 .stay-detail{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:70px;padding-block:90px}
