@@ -13,6 +13,6 @@ export function Header({ transparent=false }: { transparent?:boolean }) {
         <Link href="/tours">Tours</Link><Link href="/tours?categoria=bike">Bike tours</Link><Link href="/servicios/shuttle-panama">Shuttle Panamá</Link><Link href="/servicios/fotografia-drones">Servicio de drones</Link><Link href="/tours?destino=pedasi">Tours en Pedasí</Link><Link href="/hospedajes">Hospedaje y cabañas</Link><Link href="/responsabilidad-social">Responsabilidad social</Link><Link href="/derechos-de-autor">Derechos de autor</Link>
       </div></div><Link href="/blog">Blog</Link><Link href="/faqs">FAQs</Link><Link href="/contacto">Contacto</Link>
     </nav>
-    <div className="nav-actions"><Link href="/cuenta" className="account-link">Mi cuenta</Link><Link href="/tours" className="button button--small">Reservar <b>↗</b></Link></div>
+    <div className="nav-actions"><Link href="/cuenta" className="account-link">Mi cuenta</Link><Link href="/carrito" className="cart-link" aria-label="Ver carrito">◫ Carrito</Link><Link href="/tours" className="button button--small">Reservar <b>↗</b></Link></div>
   </div></header>;
 }
