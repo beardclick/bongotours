@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { SiteLink as Link } from './ui/site-link';
 import { Header } from './ui/header';
 import { categories, tours } from './data';
 import { Footer } from './ui/footer';

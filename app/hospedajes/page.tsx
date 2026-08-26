@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '../ui/site-link';
 import { Header } from '../ui/header';
 import { Footer } from '../ui/footer';
 import { WhatsApp } from '../ui/whatsapp';

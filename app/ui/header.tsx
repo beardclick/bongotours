@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import { SiteLink as Link } from './site-link';
 import { useState } from 'react';
 
 export function Header({ transparent=false }: { transparent?:boolean }) {

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { SiteLink as Link } from './site-link';
 import type { Tour } from '../data';
 
 export function TourCard({tour,index}:{tour:Tour;index:number}){

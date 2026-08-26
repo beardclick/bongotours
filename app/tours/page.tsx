@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '../ui/site-link';
 import { categories } from '../data';
 import { getTours } from '../lib/tours';
 import { Header } from '../ui/header';
