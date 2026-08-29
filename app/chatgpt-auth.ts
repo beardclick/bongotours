@@ -1,105 +1,33 @@
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { env } from 'cloudflare:workers';
+import { isUserActive } from './lib/user-profile';
 
-export type ChatGPTUser = {
-  userId: string;
-  displayName: string;
-  email: string;
-  fullName: string | null;
-};
+export type ChatGPTUser = {userId:string;displayName:string;email:string;fullName:string|null};
+const ACCESS_COOKIE='bongo-access-token';
+const REFRESH_COOKIE='bongo-refresh-token';
+const USER_ID_HEADER='oai-authenticated-user-id';
+const USER_EMAIL_HEADER='oai-authenticated-user-email';
+const USER_FULL_NAME_HEADER='oai-authenticated-user-full-name';
+const USER_FULL_NAME_ENCODING_HEADER='oai-authenticated-user-full-name-encoding';
+const PERCENT_ENCODED_UTF8='percent-encoded-utf-8';
+const SIWC_SIGN_IN_PATH='/signin-with-chatgpt';
+const SIWC_SIGN_OUT_PATH='/signout-with-chatgpt';
+const CALLBACK_PATH='/callback';
 
-const USER_ID_HEADER = 'oai-authenticated-user-id';
-const USER_EMAIL_HEADER = 'oai-authenticated-user-email';
-const USER_FULL_NAME_HEADER = 'oai-authenticated-user-full-name';
-const USER_FULL_NAME_ENCODING_HEADER =
-  'oai-authenticated-user-full-name-encoding';
-const PERCENT_ENCODED_UTF8 = 'percent-encoded-utf-8';
-const SIGN_IN_PATH = '/signin-with-chatgpt';
-const SIGN_OUT_PATH = '/signout-with-chatgpt';
-const CALLBACK_PATH = '/callback';
+function runtimeValue(key:string){const runtimeEnv=env as unknown as Record<string,unknown>;return String(runtimeEnv[key]??process.env[key]??'').trim()}
+export function supabaseConfig(){const url=runtimeValue('SUPABASE_URL').replace(/\/$/,'');const anonKey=runtimeValue('SUPABASE_ANON_KEY');return url&&anonKey?{url,anonKey}:null}
+export async function supabaseAuthRequest(path:string,init:RequestInit={}){const config=supabaseConfig();if(!config)throw new Error('Supabase no está configurado.');const requestHeaders=new Headers(init.headers);requestHeaders.set('apikey',config.anonKey);requestHeaders.set('content-type','application/json');return fetch(`${config.url}/auth/v1${path}`,{...init,headers:requestHeaders})}
 
-export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get(USER_ID_HEADER);
-  const email = requestHeaders.get(USER_EMAIL_HEADER);
-  if (!userId || !email) return null;
-
-  const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get(USER_FULL_NAME_ENCODING_HEADER) === PERCENT_ENCODED_UTF8
-      ? safeDecodeURIComponent(encodedFullName)
-      : null;
-
-  return {
-    userId,
-    displayName: fullName ?? email,
-    email,
-    fullName,
-  };
-}
-
-export async function requireChatGPTUser(
-  returnTo: string,
-): Promise<ChatGPTUser> {
-  const user = await getChatGPTUser();
-  if (user) return user;
-
-  redirect(chatGPTSignInPath(returnTo));
-}
-
-export function isAdminEmail(email: string): boolean {
-  const runtimeEnv = env as unknown as Record<string, unknown>;
-  const configured = String(runtimeEnv.ADMIN_EMAILS ?? process.env.ADMIN_EMAILS ?? '');
-  const allowed = configured.split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
-  if (process.env.NODE_ENV !== 'production' && email.toLowerCase().endsWith('@sites.test')) return true;
-  return allowed.includes(email.trim().toLowerCase());
-}
-
-export async function requireChatGPTAdmin(returnTo = '/admin'): Promise<ChatGPTUser> {
-  const user = await requireChatGPTUser(returnTo);
-  if (isAdminEmail(user.email)) return user;
-  redirect('/cuenta?admin=denied');
-}
-
-export function chatGPTSignInPath(returnTo: string): string {
-  const safeReturnTo = safeRelativeReturnPath(returnTo);
-  return `${SIGN_IN_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
-}
-
-export function chatGPTSignOutPath(returnTo = '/'): string {
-  const safeReturnTo = safeRelativeReturnPath(returnTo);
-  return `${SIGN_OUT_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
-}
-
-function safeRelativeReturnPath(value: string): string {
-  if (!value.startsWith('/') || value.startsWith('//')) return '/';
-
-  let url: URL;
-  try {
-    url = new URL(value, 'https://app.local');
-  } catch {
-    return '/';
-  }
-  if (url.origin !== 'https://app.local') return '/';
-  if (isReservedAuthPath(url.pathname)) return '/';
-
-  return `${url.pathname}${url.search}${url.hash}`;
-}
-
-function isReservedAuthPath(pathname: string): boolean {
-  return (
-    pathname === SIGN_IN_PATH ||
-    pathname === SIGN_OUT_PATH ||
-    pathname === CALLBACK_PATH
-  );
-}
-
-function safeDecodeURIComponent(value: string): string | null {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return null;
-  }
-}
+async function getSupabaseUser():Promise<ChatGPTUser|null>{const config=supabaseConfig();if(!config)return null;const store=await cookies();const access=store.get(ACCESS_COOKIE)?.value;if(!access)return null;const response=await supabaseAuthRequest('/user',{headers:{Authorization:`Bearer ${access}`},cache:'no-store'});if(!response.ok)return null;const user=await response.json() as {id?:string;email?:string;user_metadata?:Record<string,unknown>};if(!user.id||!user.email)return null;const fullName=String(user.user_metadata?.full_name??user.user_metadata?.name??'').trim()||null;return{userId:user.id,email:user.email,fullName,displayName:fullName??user.email}}
+async function getSitesUser():Promise<ChatGPTUser|null>{const requestHeaders=await headers();const userId=requestHeaders.get(USER_ID_HEADER);const email=requestHeaders.get(USER_EMAIL_HEADER);if(!userId||!email)return null;const encodedFullName=requestHeaders.get(USER_FULL_NAME_HEADER);const fullName=encodedFullName&&requestHeaders.get(USER_FULL_NAME_ENCODING_HEADER)===PERCENT_ENCODED_UTF8?safeDecodeURIComponent(encodedFullName):null;return{userId,email,fullName,displayName:fullName??email}}
+export async function getChatGPTUser():Promise<ChatGPTUser|null>{const user=await getSupabaseUser()??await getSitesUser();return user&&await isUserActive(user.userId)?user:null}
+export async function requireChatGPTUser(returnTo:string):Promise<ChatGPTUser>{const user=await getChatGPTUser();if(user)return user;if(supabaseConfig()){const store=await cookies();if(store.get(REFRESH_COOKIE)?.value)redirect(`/api/auth/refresh?return_to=${encodeURIComponent(safeRelativeReturnPath(returnTo))}`)}redirect(chatGPTSignInPath(returnTo))}
+export function isAdminEmail(email:string):boolean{const allowed=runtimeValue('ADMIN_EMAILS').split(',').map(value=>value.trim().toLowerCase()).filter(Boolean);if(process.env.NODE_ENV!=='production'&&email.toLowerCase().endsWith('@sites.test'))return true;return allowed.includes(email.trim().toLowerCase())}
+export async function requireChatGPTAdmin(returnTo='/admin'):Promise<ChatGPTUser>{const user=await requireChatGPTUser(returnTo);if(isAdminEmail(user.email))return user;redirect('/cuenta?admin=denied')}
+export async function isCurrentUserAdmin(){const user=await getChatGPTUser();return Boolean(user&&isAdminEmail(user.email))}
+export function chatGPTSignInPath(returnTo:string):string{const safeReturnTo=safeRelativeReturnPath(returnTo);return supabaseConfig()?`/acceso?return_to=${encodeURIComponent(safeReturnTo)}`:`${SIWC_SIGN_IN_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`}
+export function chatGPTSignOutPath(returnTo='/'):string{const safeReturnTo=safeRelativeReturnPath(returnTo);return supabaseConfig()?`/api/auth/signout?return_to=${encodeURIComponent(safeReturnTo)}`:`${SIWC_SIGN_OUT_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`}
+export const authCookies={access:ACCESS_COOKIE,refresh:REFRESH_COOKIE};
+function safeRelativeReturnPath(value:string):string{if(!value.startsWith('/')||value.startsWith('//'))return '/';let url:URL;try{url=new URL(value,'https://app.local')}catch{return '/'}if(url.origin!=='https://app.local')return '/';if([SIWC_SIGN_IN_PATH,SIWC_SIGN_OUT_PATH,CALLBACK_PATH].includes(url.pathname))return '/';return `${url.pathname}${url.search}${url.hash}`}
+function safeDecodeURIComponent(value:string):string|null{try{return decodeURIComponent(value)}catch{return null}}

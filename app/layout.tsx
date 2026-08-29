@@ -3,6 +3,7 @@ import { Montserrat } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { RevealEffects } from './ui/reveal-effects';
+import { ScrollTop } from './ui/scroll-top';
 
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' });
 
@@ -18,5 +19,5 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const gaId=process.env.NEXT_PUBLIC_GA_ID;
-  return <html lang="es"><body className={montserrat.variable}>{children}<RevealEffects/>{gaId&&<><Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive"/><Script id="google-analytics" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${gaId}');`}</Script></>}</body></html>;
+  return <html lang="es"><body className={montserrat.variable}>{children}<RevealEffects/><ScrollTop/>{gaId&&<><Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive"/><Script id="google-analytics" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${gaId}');`}</Script></>}</body></html>;
 }

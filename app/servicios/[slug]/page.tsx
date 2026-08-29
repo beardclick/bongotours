@@ -7,6 +7,8 @@ import { Footer } from '../../ui/footer';
 import { WhatsApp } from '../../ui/whatsapp';
 import { ShareButtons } from '../../ui/share-buttons';
 import { SectionNav } from '../../ui/section-nav';
+import { isCurrentUserAdmin } from '../../chatgpt-auth';
+import { AdminEditLink } from '../../ui/admin-edit-link';
 
 export const dynamic = 'force-dynamic';
 export function generateStaticParams() { return defaultServices.map(service => ({ slug: service.slug })); }
@@ -24,6 +26,7 @@ function priceLabel(price: number, type: string) {
 export default async function ServicePage({ params }: { params: Promise<{slug: string}> }) {
   const service = await getService((await params).slug);
   if (!service) notFound();
+  const isAdmin = await isCurrentUserAdmin();
   const message = encodeURIComponent(`Hola Bongo Outdoors, deseo cotizar ${service.name}. Página: https://bongo-outdoors-panama-tours.chiriquitech.chatgpt.site/servicios/${service.slug}`);
   return <main>
     <Header transparent />
@@ -33,6 +36,6 @@ export default async function ServicePage({ params }: { params: Promise<{slug: s
     <section className="tour-detail shell"><article className="tour-copy" id="resumen"><p className="eyebrow"><span /> El servicio</p><h2>Haz que cada detalle de tu experiencia cuente.</h2><p className="lead">{service.description}</p><p>Nuestro equipo coordina contigo el alcance, la ubicación, el horario y los entregables. Antes de confirmar revisamos disponibilidad, condiciones del lugar y cualquier requisito especial.</p><div className="detail-columns"><div><h3>✓ Qué incluye</h3><ul>{service.includes.map(item => <li key={item}>{item}</li>)}</ul></div><div><h3>◎ Ideal para</h3><ul>{service.idealFor.map(item => <li key={item}>{item}</li>)}</ul></div></div><div className="detail-block" id="condiciones"><h3>Disponibilidad y condiciones</h3><p>La operación depende del clima, permisos aplicables y condiciones de seguridad. Te confirmaremos todos los detalles antes de aceptar el servicio.</p></div></article>
       <aside id="cotizar" className="stay-booking"><span className={`booking-mode ${service.priceType === 'group' ? 'booking-mode--group' : ''}`}>Tarifa por {service.priceType === 'person' ? 'persona' : service.priceType === 'group' ? 'grupo' : 'servicio'}</span><small>{service.price ? 'Desde' : 'Precio'}</small><div><strong>{priceLabel(service.price, service.priceType)}</strong></div><p>Respuesta y coordinación directa con Bongo Outdoors.</p><a className="button button--primary full" href={`https://wa.me/50764467276?text=${message}`} target="_blank" rel="noreferrer">Cotizar por WhatsApp <b>→</b></a></aside>
     </section>
-    <Footer /><WhatsApp tour={service.name} />
+    <Footer /><WhatsApp tour={service.name} />{isAdmin && <AdminEditLink href={`/admin?tab=service&edit=${service.slug}`} label="Editar servicio" />}
   </main>;
 }

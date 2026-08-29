@@ -1,5 +1,5 @@
 import { defaultServices, type Service, type ServicePriceType } from '../services-data';
-import { getServices as getRows } from './content';
+import { getContentTombstones, getServices as getRows } from './content';
 
 type ServiceRow = {
   slug: string;
@@ -29,9 +29,9 @@ function rowToService(row: ServiceRow): Service {
 }
 
 export async function getAllServices(): Promise<Service[]> {
-  const rows = await getRows() as ServiceRow[];
+  const [rows,deleted] = await Promise.all([getRows() as Promise<ServiceRow[]>,getContentTombstones('services')]);
   const custom = rows.map(rowToService);
-  return [...custom, ...defaultServices.filter(service => !custom.some(item => item.slug === service.slug))];
+  return [...custom, ...defaultServices.filter(service => !deleted.has(service.slug)&&!custom.some(item => item.slug === service.slug))];
 }
 
 export async function getService(slug: string): Promise<Service | undefined> {

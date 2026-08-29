@@ -1,0 +1,3 @@
+import type { Metadata } from 'next';import { Header } from '../ui/header';import { Footer } from '../ui/footer';import { AuthForm } from '../ui/auth-form';import { turnstileSiteKey } from '../lib/turnstile';
+export const metadata:Metadata={title:'Acceso y registro',robots:{index:false,follow:false}};
+export default async function Acceso({searchParams}:{searchParams:Promise<{return_to?:string}>}){const query=await searchParams;const returnTo=query.return_to?.startsWith('/')&&!query.return_to.startsWith('//')?query.return_to:'/cuenta';return <main><Header/><section className="auth-page"><AuthForm returnTo={returnTo} turnstileSiteKey={turnstileSiteKey()}/></section><Footer/></main>}

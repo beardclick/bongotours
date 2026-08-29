@@ -1,0 +1,7 @@
+import { NextResponse } from 'next/server';
+import { authCookies } from '../../chatgpt-auth';
+type Session={access_token?:unknown;refresh_token?:unknown;expires_in?:unknown};
+export function withSession(body:unknown,session:Session,status=200){const response=NextResponse.json(body,{status});const access=String(session.access_token??'');const refresh=String(session.refresh_token??'');if(access)response.cookies.set(authCookies.access,access,{httpOnly:true,secure:true,sameSite:'lax',path:'/',maxAge:Number(session.expires_in)||3600});if(refresh)response.cookies.set(authCookies.refresh,refresh,{httpOnly:true,secure:true,sameSite:'lax',path:'/',maxAge:60*60*24*30});return response}
+export function applySession(response:NextResponse,session:Session){const access=String(session.access_token??'');const refresh=String(session.refresh_token??'');if(access)response.cookies.set(authCookies.access,access,{httpOnly:true,secure:true,sameSite:'lax',path:'/',maxAge:Number(session.expires_in)||3600});if(refresh)response.cookies.set(authCookies.refresh,refresh,{httpOnly:true,secure:true,sameSite:'lax',path:'/',maxAge:60*60*24*30});return response}
+export function clearSession(response:NextResponse){response.cookies.set(authCookies.access,'',{httpOnly:true,secure:true,sameSite:'lax',path:'/',maxAge:0});response.cookies.set(authCookies.refresh,'',{httpOnly:true,secure:true,sameSite:'lax',path:'/',maxAge:0});return response}
+export function cleanReturnTo(value:string|null){return value?.startsWith('/')&&!value.startsWith('//')?value:'/'}

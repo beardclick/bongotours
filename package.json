@@ -10,7 +10,9 @@
     "build": "vinext build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "cloudflare:config": "node scripts/prepare-cloudflare-config.mjs",
+    "deploy:cloudflare": "npm run build && npm run cloudflare:config && wrangler deploy --config dist/server/wrangler.cloudflare.json"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

@@ -1,0 +1,3 @@
+'use client';
+import { useEffect,useState } from 'react';
+export function WelcomeToast({name}:{name:string}){const [visible,setVisible]=useState(false);useEffect(()=>{const key='bongo-welcome-shown';if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1');setVisible(true);const timer=setTimeout(()=>setVisible(false),6000);return()=>clearTimeout(timer)},[]);if(!visible)return null;return <div className="welcome-toast" role="status"><span>✓</span><div><small>Sesión iniciada</small><b>Welcome, {name}</b></div><button aria-label="Cerrar notificación" onClick={()=>setVisible(false)}>×</button></div>}
