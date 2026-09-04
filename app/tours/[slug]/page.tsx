@@ -9,9 +9,11 @@ import { WhatsApp } from '../../ui/whatsapp';
 import { ReviewForm } from '../../ui/review-form';
 import { ShareButtons } from '../../ui/share-buttons';
 import { SectionNav } from '../../ui/section-nav';
+import { Gallery } from '../../ui/gallery';
 import { turnstileSiteKey } from '../../lib/turnstile';
-import { isCurrentUserAdmin } from '../../chatgpt-auth';
+import { getChatGPTUser,isAdminEmail } from '../../chatgpt-auth';
 import { AdminEditLink } from '../../ui/admin-edit-link';
+import { ReviewList } from '../../ui/review-list';
 
 export function generateStaticParams(){return demos.map(t=>({slug:t.slug}));}
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const tour=await getTour(slug);if(!tour)return{};return{title:tour.h1,description:tour.short,keywords:[tour.category,tour.location,'tours Panamá','Bongo Outdoors'],openGraph:{title:tour.h1,description:tour.short,images:[tour.image],type:'website'},twitter:{card:'summary_large_image',title:tour.h1,description:tour.short,images:[tour.image]}};}
@@ -22,7 +24,7 @@ const defaultBring=['Ropa cómoda y cambio seco','Protector solar y repelente','
 const defaultRecommendations=['Llega al punto de encuentro con 15 minutos de anticipación.','Sigue en todo momento las instrucciones del guía y comunica cualquier condición médica relevante.'];
 
 export default async function TourDetail({params}:{params:Promise<{slug:string}>}){
-  const {slug}=await params;const tour=await getTour(slug);if(!tour)notFound();const isAdmin=await isCurrentUserAdmin();
+  const {slug}=await params;const tour=await getTour(slug);if(!tour)notFound();const user=await getChatGPTUser();const isAdmin=Boolean(user&&isAdminEmail(user.email));const isLoggedIn=Boolean(user);
   const included=tour.includes?.length?tour.includes:defaultIncluded;
   const excluded=tour.notIncluded?.length?tour.notIncluded:defaultExcluded;
   const bring=tour.bring?.length?tour.bring:defaultBring;
@@ -42,7 +44,7 @@ export default async function TourDetail({params}:{params:Promise<{slug:string}>
       {tour.extraMessages?.map((message,index)=><section className="tour-extra-message" key={`${message}-${index}`}><h3>Información importante</h3><p>{message}</p></section>)}
       <section className="prohibited-card"><h3>⊘ No está permitido</h3><ul>{prohibited.map(item=><li key={item}>{item}</li>)}</ul></section>
       <section className="policy-card"><span>§</span><div><h3>Política de cancelación</h3><p>{tour.policy??'Reprogramación sin cargo avisando con 72 horas. Las condiciones climáticas y las políticas específicas del operador pueden aplicar; siempre recibirás los detalles antes de confirmar.'}</p></div></section>
-      <div className="gallery" id="galeria"><img src={tour.image} alt={`${tour.name}, vista principal`}/><img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=85" alt="Paisaje de aventura en Panamá"/><img src="https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=900&q=85" alt="Naturaleza tropical"/></div>
-      <section className="review-form" id="resenas"><h2>¿Ya viviste esta aventura?</h2><p>Comparte tu experiencia. Todas las reseñas pasan por moderación antes de publicarse.</p><ReviewForm tourSlug={tour.slug} turnstileSiteKey={turnstileSiteKey()}/></section>
-    </article><BookingWidget tourSlug={tour.slug} tourName={tour.name} personPrice={tour.price} groupPrice={tour.groupPrice} priceType={tour.priceType} seasonPrices={tour.seasonPrices} minPeople={tour.minPeople} image={tour.image}/></section><Footer/><WhatsApp tour={tour.name}/>{isAdmin&&<AdminEditLink href={`/admin?tab=tour&edit=${tour.slug}`} label="Editar tour"/>}</main>;
+      <Gallery images={[tour.image,...(tour.gallery??[])]} title={tour.name}/>
+      <section className="review-form" id="resenas"><h2>¿Ya viviste esta aventura?</h2><p>Comparte tu experiencia. Todas las reseñas pasan por moderación antes de publicarse.</p><ReviewList slug={tour.slug}/><ReviewForm tourSlug={tour.slug} turnstileSiteKey={turnstileSiteKey()} isLoggedIn={isLoggedIn}/></section>
+    </article><BookingWidget tourSlug={tour.slug} tourName={tour.name} personPrice={tour.price} groupPrice={tour.groupPrice} priceType={tour.priceType} seasonPrices={tour.seasonPrices} minPeople={tour.minPeople} image={tour.image} priceOnRequest={tour.priceOnRequest}/></section><Footer/><WhatsApp tour={tour.name}/>{isAdmin&&<AdminEditLink href={`/admin?tab=tour&edit=${tour.slug}`} label="Editar tour"/>}</main>;
 }

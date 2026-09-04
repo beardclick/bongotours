@@ -12,8 +12,10 @@ import {
   FaMinus,
   FaParagraph,
   FaQuoteLeft,
+  FaVideo,
 } from 'react-icons/fa6';
 import { compressImage } from '../lib/image-compression';
+import { videoEmbedSrc } from '../lib/video';
 
 type Props={name:string;label:string;value:string};
 
@@ -47,7 +49,7 @@ export function RichTextEditor({name,label,value}:Props){
     document.execCommand(action,false,arg);
     sync();
   }
-  function block(tag:'p'|'h2'|'h3'|'blockquote'){command('formatBlock',tag);}
+  function block(tag:string){command('formatBlock',tag);}
   function insertHtml(markup:string){
     editor.current?.focus();
     document.execCommand('insertHTML',false,markup);
@@ -56,6 +58,13 @@ export function RichTextEditor({name,label,value}:Props){
   function addLink(){
     const url=window.prompt('Pega la URL del enlace');
     if(url)command('createLink',url);
+  }
+  function addVideo(){
+    const url=window.prompt('Pega la URL del video (YouTube, Vimeo o mp4)');
+    if(!url)return;
+    const embed=videoEmbedSrc(url.trim());
+    if(embed?.type==='iframe')insertHtml(`<figure class="content-media"><div class="video-embed"><iframe src="${embed.src}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></figure><p><br></p>`);
+    else insertHtml(`<figure class="content-media"><video src="${url.trim()}" controls></video></figure><p><br></p>`);
   }
   async function addMedia(event:ChangeEvent<HTMLInputElement>){
     const file=event.target.files?.[0];
@@ -82,12 +91,13 @@ export function RichTextEditor({name,label,value}:Props){
         <div className="gutenberg-brand"><b>＋</b><span>Contenido</span></div>
         <div className="gutenberg-tools" aria-label="Herramientas de formato" onMouseDown={event=>event.preventDefault()}>
           <button type="button" onClick={()=>block('p')} title="Párrafo"><FaParagraph/><span>Párrafo</span></button>
-          <button type="button" onClick={()=>block('h2')} title="Título H2"><FaHeading/><span>H2</span></button>
+          <select className="gutenberg-heading" aria-label="Nivel de título" defaultValue="" onChange={e=>{if(e.target.value)block(e.target.value);e.target.value='';}}><option value="">Título</option><option value="h1">H1</option><option value="h2">H2</option><option value="h3">H3</option><option value="h4">H4</option><option value="h5">H5</option><option value="h6">H6</option></select>
           <button type="button" onClick={()=>command('bold')} title="Negrita"><FaBold/></button>
           <button type="button" onClick={()=>command('italic')} title="Cursiva"><FaItalic/></button>
           <button type="button" onClick={()=>command('insertUnorderedList')} title="Lista"><FaListUl/></button>
           <button type="button" onClick={()=>command('insertOrderedList')} title="Lista numerada"><FaListOl/></button>
           <button type="button" onClick={addLink} title="Enlace"><FaLink/></button>
+          <button type="button" onClick={addVideo} title="Insertar video"><FaVideo/><span>Video</span></button>
         </div>
         <button className="gutenberg-media" type="button" onMouseDown={event=>event.preventDefault()} onClick={()=>mediaInput.current?.click()}><FaImage/> Añadir media</button>
         <input ref={mediaInput} type="file" accept="image/*" hidden onChange={addMedia}/>

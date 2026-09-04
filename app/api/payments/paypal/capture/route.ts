@@ -1,0 +1,2 @@
+import { NextResponse } from 'next/server';import { capturePayPalOrder } from '../../../../lib/paypal';
+export async function POST(request:Request){try{const body=await request.json() as {orderId?:string};if(!body.orderId)return NextResponse.json({success:false,message:'Orden de PayPal inválida.'},{status:400});const data=await capturePayPalOrder(body.orderId);return NextResponse.json({success:true,reference:data.id})}catch(error){return NextResponse.json({success:false,message:error instanceof Error?error.message:'No se pudo confirmar PayPal.'},{status:500})}}

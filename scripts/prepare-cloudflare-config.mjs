@@ -9,7 +9,8 @@ config.r2_buckets=[{binding:'FILES',bucket_name:'bongo-outdoors-staging-files'}]
 config.vars={
   ...(config.vars??{}),
   SUPABASE_URL:'https://ysymfuonqcndxuvidlfa.supabase.co',
-  SITE_URL:'https://bongo-outdoors-staging.bongoutdoors.workers.dev',
+  SITE_URL:'https://bongoutdoors.com',
+  PAYPAL_MODE:'sandbox',
   TURNSTILE_SITE_KEY:'0x4AAAAAAEdcBoTNLErnUbDy',
   MAIL_FROM:'Bongo Outdoors <reservas@bongoutdoors.com>',
 };

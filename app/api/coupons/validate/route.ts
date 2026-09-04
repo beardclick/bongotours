@@ -1,0 +1,6 @@
+import { NextResponse } from 'next/server';
+import { getChatGPTUser } from '../../../chatgpt-auth';
+import { ensureDatabase } from '../../../../db/runtime';
+import { validateCoupon,type CouponItem } from '../../../lib/coupons';
+import { priceCheckoutItems,type CheckoutItemInput } from '../../../lib/checkout-pricing';
+export async function POST(request:Request){try{const body=await request.json() as {code?:string;items?:CheckoutItemInput[];email?:string};const requested=Array.isArray(body.items)?body.items:[];if(!requested.length)return NextResponse.json({valid:false,error:'El carrito está vacío.'},{status:400});const [{items},db,user]=await Promise.all([priceCheckoutItems(requested),ensureDatabase(),getChatGPTUser()]);const result=await validateCoupon(db,{code:String(body.code||''),items:items as CouponItem[],email:String(body.email||user?.email||''),userId:user?.userId});if(!result.valid)return NextResponse.json(result,{status:400});return NextResponse.json({valid:true,code:result.code,discount:result.discount,subtotal:result.cartSubtotal,total:result.total,items});}catch(error){return NextResponse.json({valid:false,error:error instanceof Error?error.message:'No se pudo validar el carrito.'},{status:400})}}
