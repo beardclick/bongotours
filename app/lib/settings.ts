@@ -3,6 +3,7 @@ import { ensureDatabase } from '../../db/runtime';
 export type PaymentMethods = {cash:boolean;paguelo:boolean;paypal:boolean};
 export type FooterLogo = {id:string;label:string;image:string;alt:string;link:string;enabled:boolean};
 export const defaultFooterLogos:FooterLogo[]=[
+  {id:'sello-anfitrion',label:'Sello Anfitrión',image:'/images/anfitrion.png',alt:'Sello Anfitrión',link:'',enabled:true},
   {id:'visit-panama',label:'Visit Panamá',image:'/images/visit_panama.png',alt:'Visit Panamá',link:'https://www.visitpanama.com/',enabled:true},
   {id:'payment-methods',label:'Métodos de pago',image:'/images/visa-mc-clave-300x67.png',alt:'Visa, Mastercard y Clave',link:'',enabled:true},
 ];
@@ -59,20 +60,17 @@ export async function getFooterLogos():Promise<FooterLogo[]>{
     const db=await ensureDatabase();
     const row=await db.prepare('SELECT value FROM settings WHERE key=?').bind('footer_logos').first<{value:string}>();
     if(!row)return defaultFooterLogos;
-    const saved=JSON.parse(row.value) as Partial<FooterLogo>[];
-    return defaultFooterLogos.map((fallback)=>{
-      const item=saved.find((candidate)=>candidate.id===fallback.id);
-      return item?{...fallback,...item,id:fallback.id,label:fallback.label,image:String(item.image??fallback.image),alt:String(item.alt??fallback.alt),link:String(item.link??''),enabled:item.enabled!==false}:fallback;
-    });
+    const saved=JSON.parse(row.value);
+    if(Array.isArray(saved)) return [...defaultFooterLogos.filter(item=>!saved.some((entry:FooterLogo)=>entry.id===item.id)),...saved];
+    return Array.isArray(saved.logos)?saved.logos:defaultFooterLogos;
   }catch{return defaultFooterLogos;}
 }
 
 export async function setFooterLogos(logos:FooterLogo[]):Promise<void>{
-  const normalized=defaultFooterLogos.map((fallback)=>{
-    const item=logos.find((candidate)=>candidate.id===fallback.id)??fallback;
-    let link='';try{const url=new URL(item.link);if(url.protocol==='https:'||url.protocol==='http:')link=url.toString()}catch{}
-    return{id:fallback.id,label:fallback.label,image:String(item.image||'').trim().slice(0,500),alt:String(item.alt||'').trim().slice(0,160),link,enabled:Boolean(item.enabled)};
+  const normalized=logos.slice(0,50).map((item)=>{
+    let link='';try{const url=new URL(String(item.link));if(url.protocol==='https:'||url.protocol==='http:')link=url.toString()}catch{}
+    return{id:String(item.id||crypto.randomUUID()).slice(0,100),label:String(item.label||'Logo').trim().slice(0,160),image:String(item.image||'').trim().slice(0,500),alt:String(item.alt||'').trim().slice(0,160),link,enabled:Boolean(item.enabled)};
   });
   const db=await ensureDatabase();
-  await db.prepare(`INSERT INTO settings (key,value,updated_at) VALUES ('footer_logos',?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at`).bind(JSON.stringify(normalized),new Date().toISOString()).run();
+  await db.prepare(`INSERT INTO settings (key,value,updated_at) VALUES ('footer_logos',?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at`).bind(JSON.stringify({version:2,logos:normalized}),new Date().toISOString()).run();
 }
