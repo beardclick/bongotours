@@ -558,6 +558,7 @@ img.featured-badge__icon{width:14px;height:14px;object-fit:contain;display:block
 .coffee-circuit__actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
 .footer__badges{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;padding:22px 0;border-top:1px solid rgba(255,255,255,.12);margin-top:30px}
 .footer__badges img{height:40px;width:auto;object-fit:contain}
+.footer__badge{display:flex;align-items:center;justify-content:center;min-width:110px;max-width:200px;min-height:54px}.footer__badge a{display:flex;align-items:center;justify-content:center}.footer__badge img{max-width:180px;max-height:50px;width:auto;height:auto;object-fit:contain}.footer .socials{flex-wrap:wrap}.footer .socials a{flex:0 0 40px;width:40px;height:40px;font-size:17px;color:#fff}.footer .socials a:hover{background:var(--green);border-color:var(--green)}.order-period-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
 @media(max-width:700px){.coffee-circuit__inner{flex-direction:column;text-align:center}.coffee-circuit__logo{width:150px}.coffee-circuit__actions{justify-content:center}}
 .image-upload__actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .media-picker{position:fixed;inset:0;z-index:300;background:rgba(5,18,15,.72);display:flex;align-items:center;justify-content:center;padding:24px}
