@@ -358,6 +358,7 @@ img.featured-badge__icon{width:14px;height:14px;object-fit:contain;display:block
 .image-upload{position:relative;display:grid;gap:10px;padding:14px;border:2px dashed #cfdcd6;border-radius:14px;background:#f8faf9;text-align:center}
 .image-upload.is-dragging{border-color:var(--green);background:#eff7f3}
 .image-upload__preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px}
+.footer-logo-row .image-upload{padding:10px;gap:6px;justify-items:start;text-align:left}.footer-logo-row .image-upload__preview{width:120px;height:64px;max-height:64px;object-fit:contain;background:#eef2f0;border-radius:6px}.footer-logo-row .image-upload__empty{padding:8px;min-height:64px}.footer-logo-row .image-upload__actions{margin-top:0}.footer-logo-row .image-upload__action{padding:7px 12px}
 .image-upload__empty{display:grid;gap:5px;justify-items:center;padding:18px 10px;color:#557069}
 .image-upload__empty span{font-size:30px}
 .image-upload__empty b{font-size:14px}
