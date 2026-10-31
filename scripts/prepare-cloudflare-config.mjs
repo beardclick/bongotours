@@ -10,9 +10,11 @@ config.vars={
   ...(config.vars??{}),
   SUPABASE_URL:'https://ysymfuonqcndxuvidlfa.supabase.co',
   SITE_URL:'https://bongoutdoors.com',
-  PAYPAL_MODE:'sandbox',
+  PAYPAL_MODE:'live',
   TURNSTILE_SITE_KEY:'0x4AAAAAAEdcBoTNLErnUbDy',
   MAIL_FROM:'Bongo Outdoors <reservas@bongoutdoors.com>',
+  NEXT_PUBLIC_GA_ID:'G-8WQ9FBYXE7',
+  NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION:'googlef60a0889e0d7b206',
 };
 await writeFile(target,`${JSON.stringify(config,null,2)}\n`);
 console.log('Configuración de Cloudflare preparada.');

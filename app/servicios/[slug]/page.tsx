@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { defaultServices } from '../../services-data';
 import { getService } from '../../lib/services';
 import { Header } from '../../ui/header';
 import { Footer } from '../../ui/footer';
@@ -14,7 +13,6 @@ import { ReviewList } from '../../ui/review-list';
 import { turnstileSiteKey } from '../../lib/turnstile';
 
 export const dynamic = 'force-dynamic';
-export function generateStaticParams() { return defaultServices.map(service => ({ slug: service.slug })); }
 export async function generateMetadata({ params }: { params: Promise<{slug: string}> }): Promise<Metadata> {
   const service = await getService((await params).slug);
   return service ? { title: service.h1, description: service.description, openGraph: { title: service.h1, description: service.description, images: [service.image] } } : {};

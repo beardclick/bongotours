@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /cuenta
+Disallow: /carrito
+Disallow: /api/
+
+Sitemap: https://bongoutdoors.com/sitemap.xml

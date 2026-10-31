@@ -15,11 +15,13 @@ export function CartCheckout({
   customer,
   turnstileSiteKey,
   paymentMethods = { cash: true, paguelo: true, paypal: true },
+  liabilityWaiver = "",
 }: {
   isLoggedIn?: boolean;
   customer?: { fullName?: string; email?: string; phone?: string };
   turnstileSiteKey: string;
   paymentMethods?: { cash: boolean; paguelo: boolean; paypal: boolean };
+  liabilityWaiver?: string;
 }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
@@ -31,6 +33,8 @@ export function CartCheckout({
   const [couponStatus, setCouponStatus] = useState("");
   const [checkoutEmail, setCheckoutEmail] = useState(customer?.email || "");
   const [challengeKey, setChallengeKey] = useState(0);
+  const [acceptedLiability, setAcceptedLiability] = useState(false);
+  const [waiverOpen, setWaiverOpen] = useState(false);
   useEffect(() => {
     try {
       setItems(
@@ -102,6 +106,10 @@ export function CartCheckout({
   async function confirm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!items.length) return;
+    if (!acceptedLiability) {
+      setStatus("Debes aceptar la Liberación de Responsabilidad para continuar.");
+      return;
+    }
     const raw = Object.fromEntries(
       new FormData(event.currentTarget).entries(),
     ) as Record<string, unknown>;
@@ -160,8 +168,12 @@ export function CartCheckout({
     try {
       if (payMethod === "paguelo") {
         sessionStorage.setItem("bongo-pending-payment", JSON.stringify(pending));
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 35000);
+        try {
         const response = await fetch("/api/payments/paguelo", {
           method: "POST",
+          signal: controller.signal,
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             contact: pending.contact,
@@ -169,6 +181,7 @@ export function CartCheckout({
             couponCode: pending.couponCode,
             checkoutKey: pending.checkoutKey,
             turnstileToken,
+            liabilityAccepted: true,
           }),
         });
         const data = (await response.json()) as {
@@ -176,7 +189,7 @@ export function CartCheckout({
           url?: string;
           message?: string;
         };
-        if (!data.success || !data.url) {
+        if (!response.ok || !data.success || !data.url) {
           sessionStorage.removeItem("bongo-pending-payment");
           setStatus(data.message || "No se pudo iniciar el pago.");
           setChallengeKey((key) => key + 1);
@@ -184,6 +197,16 @@ export function CartCheckout({
         }
         window.location.assign(data.url);
         return;
+        } catch (error) {
+          if (controller.signal.aborted) {
+            setStatus("La conexión con Paguelo Fácil tardó demasiado. Tu carrito se conserva. Verifica tu conexión y vuelve a pulsar el botón de pago.");
+            setChallengeKey((key) => key + 1);
+            return;
+          }
+          throw error;
+        } finally {
+          window.clearTimeout(timeout);
+        }
       }
       if (payMethod === "paypal") {
         sessionStorage.setItem("bongo-pending-paypal", JSON.stringify(pending));
@@ -196,6 +219,7 @@ export function CartCheckout({
             couponCode: pending.couponCode,
             checkoutKey: pending.checkoutKey,
             turnstileToken,
+            liabilityAccepted: true,
           }),
         });
         const data = (await response.json()) as {
@@ -221,6 +245,7 @@ export function CartCheckout({
           couponCode: verified?.code,
           checkoutKey,
           turnstileToken,
+          liabilityAccepted: true,
         }),
       });
       const data = (await response.json()) as {
@@ -287,11 +312,11 @@ export function CartCheckout({
             <div>
               <h3>{item.tourName}</h3>
               <p>
-                ▣ {item.tourDate} · ♙ {item.quantity} persona
-                {item.quantity === 1 ? "" : "s"}
+                ▣ {item.tourDate} · ♙ {item.quantity}{" "}
+                {item.quantity === 1 ? "persona" : "personas"}
               </p>
               <small>
-                Tarifa por {item.priceMode === "group" ? "grupo" : "persona"}
+                {item.priceMode === "group" ? "Tarifa por grupo" : "Tarifa por persona"}
               </small>
             </div>
             <strong>${item.total.toFixed(2)}</strong>
@@ -440,11 +465,68 @@ export function CartCheckout({
                   onChange={() => setPayMethod("paypal")}
                 />
                 <span>
-                  PayPal o tarjeta <small>Entorno de pruebas</small>
+                  PayPal o tarjeta <small>Pago seguro</small>
                 </span>
               </label>
             )}
           </div>
+          <label className="check-row liability-check">
+            <input
+              type="checkbox"
+              checked={acceptedLiability}
+              onChange={(e) => setAcceptedLiability(e.target.checked)}
+            />
+            <span>
+              Acepto{" "}
+              <button
+                type="button"
+                className="liability-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setWaiverOpen(true);
+                }}
+              >
+                Liberación de Responsabilidad
+              </button>{" "}
+              <small>Requerida para proceder con el pago</small>
+            </span>
+          </label>
+          {waiverOpen && (
+            <div className="waiver-modal" onClick={() => setWaiverOpen(false)}>
+              <div
+                className="waiver-modal__panel"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="waiver-modal__head">
+                  <b>Liberación de Responsabilidad</b>
+                  <button
+                    type="button"
+                    onClick={() => setWaiverOpen(false)}
+                    aria-label="Cerrar"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div
+                  className="waiver-modal__body rich-content"
+                  dangerouslySetInnerHTML={{ __html: liabilityWaiver }}
+                />
+                <div className="waiver-modal__actions">
+                  <button
+                    type="button"
+                    className="button button--primary"
+                    onClick={() => {
+                      setWaiverOpen(false);
+                      setAcceptedLiability(true);
+                    }}
+                  >
+                    Aceptar y continuar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {turnstileSiteKey && (
             <TurnstileWidget
               key={challengeKey}
@@ -458,10 +540,6 @@ export function CartCheckout({
               : "Continuar con PayPal o tarjeta"}{" "}
             <b>→</b>
           </button>
-          <small>
-            El servidor verifica nuevamente precios, fechas y descuentos antes
-            de crear el pedido.
-          </small>
           <a
             className="button button--whatsapp full"
             target="_blank"

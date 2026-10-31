@@ -49,7 +49,7 @@ export default async function Home() {
           <div><p className="eyebrow"><span /> {hero.sections.tours.eyebrow}</p><h2>{hero.sections.tours.title}</h2></div>
           <Link className="text-link" href="/tours">Ver todos los tours <b>→</b></Link>
         </div>
-        <div className="tour-grid">
+        <div className={`tour-grid${hero.tourGridColumns===4?' tour-grid--4':''}`}>
           {homeTours.map((tour, index) => <TourCard tour={tour} index={index} rating={reviewStats.get(tour.slug)||0} key={tour.slug} style={hero.tourCardStyle}/>) }
         </div>
       </section>

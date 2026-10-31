@@ -29,7 +29,6 @@ const allowedStatuses = [
   "confirmed",
   "completed",
   "cancelled",
-  "cancellation_requested",
 ];
 async function legacyPost(request: Request) {
   const body = (await request.json()) as Record<string, unknown>;
@@ -261,13 +260,13 @@ export async function PATCH(request: Request) {
     const now = new Date().toISOString();
     await db
       .prepare(
-        `UPDATE bookings SET status='cancellation_requested',updated_at=? WHERE reference=? AND status IN ('pending','confirmed')`,
+        `UPDATE bookings SET status='cancelled',updated_at=? WHERE reference=? AND status IN ('pending','confirmed')`,
       )
       .bind(now, ref)
       .run();
     await db
       .prepare(
-        `INSERT INTO booking_status_history (booking_reference,status,note,changed_by,created_at) VALUES (?,'cancellation_requested',?,?,?)`,
+        `INSERT INTO booking_status_history (booking_reference,status,note,changed_by,created_at) VALUES (?,'cancelled',?,?,?)`,
       )
       .bind(ref, reason, current.email, now)
       .run();

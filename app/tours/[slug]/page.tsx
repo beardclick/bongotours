@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { tours as demos } from '../../data';
 import { getTour } from '../../lib/tours';
 import { Header } from '../../ui/header';
 import { Footer } from '../../ui/footer';
@@ -14,8 +13,9 @@ import { turnstileSiteKey } from '../../lib/turnstile';
 import { getChatGPTUser,isAdminEmail } from '../../chatgpt-auth';
 import { AdminEditLink } from '../../ui/admin-edit-link';
 import { ReviewList } from '../../ui/review-list';
+import { FeaturedBadge } from '../../ui/featured-badge';
 
-export function generateStaticParams(){return demos.map(t=>({slug:t.slug}));}
+export const dynamic='force-dynamic';
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const tour=await getTour(slug);if(!tour)return{};return{title:tour.h1,description:tour.short,keywords:[tour.category,tour.location,'tours Panamá','Bongo Outdoors'],openGraph:{title:tour.h1,description:tour.short,images:[tour.image],type:'website'},twitter:{card:'summary_large_image',title:tour.h1,description:tour.short,images:[tour.image]}};}
 
 const defaultIncluded=['Guía local certificado','Equipo necesario para la actividad','Agua y snack local','Seguro básico de actividad'];
@@ -31,7 +31,7 @@ export default async function TourDetail({params}:{params:Promise<{slug:string}>
   const recommendations=tour.recommendations?.length?tour.recommendations:defaultRecommendations;
   const prohibited=tour.prohibited?.length?tour.prohibited:['Alcohol durante la actividad','Mascotas sin autorización','Drones personales en áreas protegidas','Acciones que afecten la flora o fauna'];
   return <main><Header transparent/>
-    <section className="tour-hero" style={{backgroundImage:`url(${tour.image})`}}><div className="tour-hero__shade"/><div className="shell"><p className="eyebrow eyebrow--light"><span/>{tour.category} · {tour.location}</p><h1>{tour.h1}</h1><div className="tour-hero__actions"><a href="#reservar" className="button button--primary">Reservar ahora <b>↓</b></a><ShareButtons title={tour.name} kind="tour"/></div></div></section>
+    <section className="tour-hero" style={{backgroundImage:`url(${tour.image})`}}><div className="tour-hero__shade"/><div className="shell"><p className="eyebrow eyebrow--light"><span/>{tour.category} · {tour.location}</p>{tour.featuredBadge&&<FeaturedBadge badge={tour.featuredBadge} clickable/>}<h1>{tour.h1}</h1><div className="tour-hero__actions"><a href="#reservar" className="button button--primary">Reservar ahora <b>↓</b></a><ShareButtons title={tour.name} kind="tour"/></div></div></section>
     <SectionNav items={[{label:'Resumen',href:'#resumen'},{label:'Detalles',href:'#detalles'},{label:'Incluye',href:'#incluye'},{label:'Recomendaciones',href:'#recomendaciones'},{label:'Galería',href:'#galeria'},{label:'Reseñas',href:'#resenas'},{label:'Reservar',href:'#reservar'}]}/>
     <section className="tour-detail shell"><article className="tour-copy" id="resumen"><p className="eyebrow"><span/> La experiencia</p><h2>Una forma distinta de conocer {tour.location}.</h2><p className="lead">{tour.short}</p>{tour.descriptionHtml?<div className="rich-content" dangerouslySetInnerHTML={{__html:tour.descriptionHtml}}/>:<p>Prepárate para descubrir paisajes extraordinarios acompañado por un guía local. Mantenemos grupos pequeños para cuidar cada detalle, movernos con respeto y disfrutar el recorrido sin prisa.</p>}
       <div className="tour-spec-grid" id="detalles" aria-label="Detalles del tour">

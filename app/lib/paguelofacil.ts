@@ -14,9 +14,11 @@ export async function pagueloCreateLink(p:{amount:number;description:string;retu
   if(p.parm1)params.set('PARM_1',p.parm1.slice(0,150));
   params.set('CARD_TYPE','CARD');
   params.set('EXPIRES_IN','3600');
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),20000);
   try{
-    const res=await fetch(`${baseUrl()}/LinkDeamon.cfm`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'*/*'},body:params.toString()});
+    const res=await fetch(`${baseUrl()}/LinkDeamon.cfm`,{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'*/*'},body:params.toString()});
     const data=await res.json() as {success?:boolean;message?:string;data?:{url?:string;code?:string}};
     return{success:Boolean(data?.success),url:data?.data?.url,code:data?.data?.code,message:data?.message};
-  }catch(e){return{success:false,message:e instanceof Error?e.message:'Error de red al contactar Paguelo Fácil.'}}
+  }catch(e){return{success:false,message:controller.signal.aborted?'Paguelo Fácil tardó demasiado en responder. Tu carrito se conserva. Intenta nuevamente.':'No pudimos conectar con Paguelo Fácil. Revisa tu conexión e intenta nuevamente.'}}finally{clearTimeout(timeout)}
 }

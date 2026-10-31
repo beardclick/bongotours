@@ -11,6 +11,7 @@ export async function POST(request:Request){
   try{
     if(!(await getPaymentMethods()).paguelo)return NextResponse.json({success:false,message:'El pago con tarjeta (Paguelo Fácil) está deshabilitado temporalmente.'},{status:400});
     const body=await request.json() as Record<string,unknown>;
+    if(body.liabilityAccepted!==true)return NextResponse.json({success:false,message:'Debes aceptar la Liberación de Responsabilidad para continuar.'},{status:400});
     if(!await verifyTurnstile(request,body.turnstileToken,'checkout'))return NextResponse.json({success:false,message:'Completa la verificación de seguridad.'},{status:400});
     const contact=body.contact&&typeof body.contact==='object'?body.contact as Record<string,unknown>:{};
     const customerName=String(contact.customerName??'').trim().slice(0,120);

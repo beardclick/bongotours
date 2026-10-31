@@ -7,7 +7,7 @@ export type Tour = {
   meetingPoint?:string; departureTime?:string; includes?:string[];
   notIncluded?:string[]; bring?:string[]; prohibited?:string[];
   recommendations?:string[]; extraMessages?:string[];
-  descriptionHtml?:string; destinationSlug?:string; destinationName?:string; gallery?:string[]; priceOnRequest?:boolean;
+  descriptionHtml?:string; destinationSlug?:string; destinationName?:string; gallery?:string[]; priceOnRequest?:boolean; featuredBadge?:{icon:string;text:string;url:string};
 };
 
 export const tours: Tour[] = [

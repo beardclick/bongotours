@@ -10,12 +10,13 @@ export async function GET(request:Request){
   const db=await ensureDatabase();
   const userId=new URL(request.url).searchParams.get('userId');
   if(userId){
-    const [profile,orders]=await Promise.all([
-      db.prepare('SELECT * FROM user_profiles WHERE user_id=?').bind(userId).first(),
-      db.prepare('SELECT * FROM bookings WHERE user_id=? ORDER BY id DESC').bind(userId).all(),
-    ]);
+    const profile=await db.prepare('SELECT * FROM user_profiles WHERE user_id=?').bind(userId).first<Record<string,unknown>>();
     if(!profile)return NextResponse.json({error:'Usuario no encontrado.'},{status:404});
-    return NextResponse.json({profile,orders:orders.results});
+    const [orders,invoices]=await Promise.all([
+      db.prepare('SELECT * FROM bookings WHERE user_id=? ORDER BY id DESC').bind(userId).all(),
+      db.prepare(`SELECT id,subject,status,sent_at,created_at FROM email_notifications WHERE recipient=? AND subject LIKE 'Tu factura %' ORDER BY id DESC`).bind(String(profile.email)).all(),
+    ]);
+    return NextResponse.json({profile,orders:orders.results,invoices:invoices.results});
   }
   const result=await db.prepare(`SELECT p.*,COUNT(b.id) AS order_count,COALESCE(SUM(b.total),0) AS order_total,MAX(b.created_at) AS last_order_at FROM user_profiles p LEFT JOIN bookings b ON b.user_id=p.user_id WHERE p.active=1 GROUP BY p.user_id ORDER BY p.created_at DESC`).all();
   return NextResponse.json(result.results);

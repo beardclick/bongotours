@@ -1,4 +1,5 @@
 import { SiteLink as Link } from './site-link';
+import { FeaturedBadge } from './featured-badge';
 import type { Tour } from '../data';
 
 export function TourCard({tour,index,rating=0,style='classic'}:{tour:Tour;index:number;rating?:number;style?:'classic'|'overlay'}){
@@ -14,6 +15,7 @@ export function TourCard({tour,index,rating=0,style='classic'}:{tour:Tour;index:
     </Link>
     <div className="tour-card__body">
       <div className="tour-card__location"><span>⌖</span>{tour.location}</div>
+      {tour.featuredBadge&&<FeaturedBadge badge={tour.featuredBadge}/>}
       <h2><Link href={href}>{tour.name}</Link></h2>
       {rating>0&&<div className="tour-card__rating" title={`${rating.toFixed(1)} de 5`}><span>{'★'.repeat(full)}{'☆'.repeat(Math.max(0,5-full))}</span><small>{rating.toFixed(1)}</small></div>}
       <p>{tour.short}</p>

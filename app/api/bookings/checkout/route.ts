@@ -9,13 +9,14 @@ import { notifyNewBooking } from '../../../lib/email';
 import { syncBookingToNotion } from '../../../lib/notion';
 
 type BookingRow={reference:string;customer_name:string;email:string;phone:string;tour_slug:string;tour_date:string;quantity:number;price_mode:string;total:number;status:string;payment_method:string;admin_notes?:string|null;notion_page_id?:string|null};
-type CheckoutBody={customerName?:unknown;email?:unknown;phone?:unknown;items?:CheckoutItemInput[];couponCode?:unknown;checkoutKey?:unknown;turnstileToken?:unknown};
+type CheckoutBody={customerName?:unknown;email?:unknown;phone?:unknown;items?:CheckoutItemInput[];couponCode?:unknown;checkoutKey?:unknown;turnstileToken?:unknown;liabilityAccepted?:unknown};
 const money=(value:number)=>Math.round((value+Number.EPSILON)*100)/100;
 
 export async function POST(request:Request){
   try{
     if(!(await getPaymentMethods()).cash)return NextResponse.json({error:'El pago en efectivo está deshabilitado temporalmente.'},{status:400});
     const body=await request.json() as CheckoutBody;
+    if(body.liabilityAccepted!==true)return NextResponse.json({error:'Debes aceptar la Liberación de Responsabilidad para continuar.'},{status:400});
     if(!await verifyTurnstile(request,body.turnstileToken,'checkout'))return NextResponse.json({error:'Completa la verificación de seguridad.'},{status:400});
     const customerName=String(body.customerName??'').trim().slice(0,120);
     const email=String(body.email??'').trim().toLowerCase().slice(0,254);
