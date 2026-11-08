@@ -1,4 +1,5 @@
 'use client';
+import { displayDate } from '../lib/display-date';
 
 import { useEffect, useState } from 'react';
 import { SiteLink as Link } from './site-link';
@@ -74,7 +75,7 @@ export function OrderConfirmation() {
       <section>
         <h2>Resumen de tu orden</h2>
         {receipt.items.map((item, index) => <article key={`${String(item.tourSlug)}-${index}`}>
-          <div><b>{String(item.tourName || 'Reserva Bongo Outdoors')}</b><small>{String(item.tourDate || '')} · {String(item.quantity || 1)} participante(s)</small></div>
+          <div><b>{String(item.tourName || 'Reserva Bongo Outdoors')}</b><small>{displayDate(String(item.tourDate || ''))} · {String(item.quantity || 1)} participante(s)</small></div>
           <strong>${Number(item.total || 0).toFixed(2)}</strong>
         </article>)}
         <div className="receipt-totals">

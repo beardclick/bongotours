@@ -1,4 +1,5 @@
 "use client";
+import { displayDate } from '../lib/display-date';
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CART_KEY, type CartItem } from "./booking-widget";
 import { SiteLink as Link } from "./site-link";
@@ -32,10 +33,13 @@ export function CartCheckout({
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const [couponStatus, setCouponStatus] = useState("");
   const [checkoutEmail, setCheckoutEmail] = useState(customer?.email || "");
+  const [checkoutName,setCheckoutName]=useState(customer?.fullName||'');
+  const [checkoutPhone,setCheckoutPhone]=useState(customer?.phone||'');
   const [challengeKey, setChallengeKey] = useState(0);
   const [acceptedLiability, setAcceptedLiability] = useState(false);
   const [waiverOpen, setWaiverOpen] = useState(false);
   useEffect(() => {
+    try{const draft=JSON.parse(sessionStorage.getItem('bongo-checkout-draft')||'null');if(draft){setCheckoutName(draft.name||customer?.fullName||'');setCheckoutPhone(draft.phone||customer?.phone||'');setCheckoutEmail(customer?.email||draft.email||'');if(paymentMethods[draft.method as Method])setPayMethod(draft.method);setCouponCode(draft.couponCode||'');}}catch{}
     try {
       setItems(
         JSON.parse(localStorage.getItem(CART_KEY) || "[]") as CartItem[],
@@ -51,6 +55,8 @@ export function CartCheckout({
     );
     setReady(true);
   }, []);
+  useEffect(()=>{if(!ready)return;try{sessionStorage.setItem('bongo-checkout-draft',JSON.stringify({name:checkoutName,phone:checkoutPhone,email:checkoutEmail,method:payMethod,couponCode}));}catch{}},[ready,checkoutName,checkoutPhone,checkoutEmail,payMethod,couponCode]);
+  function changeQuantity(index:number,quantity:number){if(!Number.isInteger(quantity)||quantity<1)return;const next=items.map((item,i)=>i===index?{...item,quantity,total:item.priceMode==='group'?item.unitPrice:item.unitPrice*quantity}:item);setItems(next);localStorage.setItem(CART_KEY,JSON.stringify(next));setCoupon(null);setCouponStatus('');setStatus('');const item=next[index];sessionStorage.setItem(`bongo-selection:${item.tourSlug}`,JSON.stringify({quantity:item.quantity,date:item.tourDate}));window.dispatchEvent(new Event('bongo-cart-updated'));}
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.total, 0),
     [items],
@@ -276,6 +282,7 @@ export function CartCheckout({
         }),
       );
       localStorage.removeItem(CART_KEY);
+      sessionStorage.removeItem('bongo-checkout-draft');
       setItems([]);
       window.location.assign("/orden/confirmada");
     } catch (error) {
@@ -312,12 +319,14 @@ export function CartCheckout({
             <div>
               <h3>{item.tourName}</h3>
               <p>
-                ▣ {item.tourDate} · ♙ {item.quantity}{" "}
+                ▣ {displayDate(item.tourDate)} · ♙ {item.quantity}{" "}
                 {item.quantity === 1 ? "persona" : "personas"}
               </p>
               <small>
                 {item.priceMode === "group" ? "Tarifa por grupo" : "Tarifa por persona"}
               </small>
+              <label className="cart-quantity">Personas<input type="number" min={item.minPeople||1} step="1" value={item.quantity} onChange={event=>changeQuantity(index,Number(event.target.value))}/></label>
+              {Number(item.minPeople)>1&&<small>Mínimo {item.minPeople} personas</small>}
             </div>
             <strong>${item.total.toFixed(2)}</strong>
             <button
@@ -398,7 +407,8 @@ export function CartCheckout({
               name="customerName"
               required
               maxLength={120}
-              defaultValue={customer?.fullName || ""}
+              value={checkoutName}
+              onChange={event=>setCheckoutName(event.target.value)}
             />
           </label>
           <label>
@@ -422,7 +432,8 @@ export function CartCheckout({
               required
               maxLength={40}
               placeholder="+507 ..."
-              defaultValue={customer?.phone || ""}
+              value={checkoutPhone}
+              onChange={event=>setCheckoutPhone(event.target.value)}
             />
           </label>
           <div className="pay-methods">
@@ -551,6 +562,7 @@ export function CartCheckout({
           {status && (
             <p className="form-status" role="status">
               {status}
+              {!isLoggedIn&&/inicia sesi[oó]n|ya tiene una cuenta/i.test(status)&&<Link className="button button--primary full" href="/acceso?return_to=%2Fcarrito">Iniciar sesión y volver al carrito</Link>}
             </p>
           )}
         </form>
