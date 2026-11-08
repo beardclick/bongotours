@@ -48,6 +48,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   };
   return <html lang="es">
     <head>
+      <script id="bongo-gtm" dangerouslySetInnerHTML={{__html:`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-NWBHXRNT');`}}/>
       <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48"/>
       <link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96"/>
       <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180"/>
@@ -56,7 +57,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       {verification&&<meta name="google-site-verification" content={verification}/>}
       {gaId&&<>
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}/>
-        <script dangerouslySetInnerHTML={{__html:`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${gaId}');`}}/>
+        <script dangerouslySetInnerHTML={{__html:`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${gaId}');gtag('config','AW-18560135595');`}}/>
       </>}
     </head>
     <body className={montserrat.variable}>{children}<RevealEffects/><ScrollTop/></body>

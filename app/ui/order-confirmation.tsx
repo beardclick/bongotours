@@ -26,11 +26,38 @@ export function OrderConfirmation() {
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem('bongo-last-order');
-      if (saved) setReceipt(JSON.parse(saved) as Receipt);
+      setReceipt(saved ? JSON.parse(saved) as Receipt : null);
     } catch {
       setReceipt(null);
     }
   }, []);
+
+  useEffect(() => {
+    if (!receipt || !Array.isArray(receipt.orders)) return;
+    // Only this confirmation view records conversions. Persist the reference so
+    // refreshes, React remounts and return visits do not submit it again.
+    const browser = window as typeof window & { gtag?: (...args: unknown[]) => void };
+    if (typeof browser.gtag !== 'function') return;
+    for (const order of receipt.orders) {
+      const reference = String(order.reference || '').trim();
+      if (!reference) continue;
+      const key = `bongo-ads-reservation:${reference}`;
+      try {
+        if (localStorage.getItem(key) || sessionStorage.getItem(key)) continue;
+        localStorage.setItem(key, 'sent');
+      } catch {
+        if (sessionStorage.getItem(key)) continue;
+        sessionStorage.setItem(key, 'sent');
+      }
+      const total = Number(receipt.orders.length === 1 ? receipt.total : order.total);
+      browser.gtag('event', 'conversion', {
+        send_to: 'AW-18560135595/rfxUCN7bh7QdEKvjlJJF',
+        value: Number.isFinite(total) && total >= 0 ? total : 1.0,
+        currency: 'USD',
+        transaction_id: reference,
+      });
+    }
+  }, [receipt]);
 
   if (receipt === undefined) {
     return <div className="cart-empty"><p>Cargando confirmación…</p></div>;
