@@ -1,4 +1,5 @@
 'use client';
+import { displayDate } from '../lib/display-date';
 import { useEffect,useState } from 'react';
 import { FaCartShopping,FaTrash } from 'react-icons/fa6';
 import { SiteLink as Link } from './site-link';
@@ -34,6 +35,6 @@ function CartDropdown({items,total,onNavigate,onRemove}:{items:CartItem[];total:
     <div className="cart-dropdown__head"><b>Tu carrito</b>{items.length>0&&<span>{items.length} {items.length===1?'artículo':'artículos'}</span>}</div>
     {items.length===0
       ? <div className="cart-dropdown__empty"><p>Tu carrito está vacío.</p><Link className="button button--primary" href="/tours" onClick={onNavigate}>Explorar tours</Link></div>
-      : <><div className="cart-dropdown__items">{items.slice(0,4).map((item,index)=><div className="cart-dropdown__item" key={`${item.tourSlug}-${item.tourDate}`}><img src={item.image||'/images/bongo-hero.png'} alt=""/><div><b>{item.tourName}</b><small>{item.tourDate} · {item.quantity} {item.quantity===1?'persona':'personas'}</small></div><strong>${item.total.toFixed(2)}</strong><button type="button" className="cart-dropdown__remove" aria-label={`Quitar ${item.tourName}`} onClick={()=>onRemove(index)}><FaTrash/></button></div>)}</div><div className="cart-dropdown__total"><span>Total estimado</span><strong>${total.toFixed(2)}</strong></div><Link className="button button--primary" href="/carrito" onClick={onNavigate}>Ver carrito y confirmar <b>→</b></Link>{items.length>4&&<small className="cart-dropdown__more">+{items.length-4} artículos más</small>}</>}
+      : <><div className="cart-dropdown__items">{items.slice(0,4).map((item,index)=><div className="cart-dropdown__item" key={`${item.tourSlug}-${item.tourDate}`}><img src={item.image||'/images/bongo-hero.png'} alt=""/><div><b>{item.tourName}</b><small>{displayDate(item.tourDate)} · {item.quantity} {item.quantity===1?'persona':'personas'}</small></div><strong>${item.total.toFixed(2)}</strong><button type="button" className="cart-dropdown__remove" aria-label={`Quitar ${item.tourName}`} onClick={()=>onRemove(index)}><FaTrash/></button></div>)}</div><div className="cart-dropdown__total"><span>Total estimado</span><strong>${total.toFixed(2)}</strong></div><Link className="button button--primary" href="/carrito" onClick={onNavigate}>Ver carrito y confirmar <b>→</b></Link>{items.length>4&&<small className="cart-dropdown__more">+{items.length-4} artículos más</small>}</>}
   </div>;
 }

@@ -1,3 +1,4 @@
+import { displayDate } from './display-date';
 export type InvoiceOrder = {
   reference: string;
   customer_name: string;
@@ -29,8 +30,8 @@ export function invoiceHtml(order: InvoiceOrder): string {
   const total = Number(order.total || 0).toFixed(2);
   const quantity = Math.max(1, Number(order.quantity || 1));
   const unit = (Number(order.total || 0) / quantity).toFixed(2);
-  const issued = new Date().toLocaleDateString('es-PA', { year: 'numeric', month: 'long', day: 'numeric' });
-  const tourDate = order.tour_date ? String(order.tour_date).slice(0, 10) : '—';
+  const issued = displayDate(new Date().toISOString());
+  const tourDate = order.tour_date ? displayDate(String(order.tour_date)) : '—';
   const tourName = String(order.tour_slug || '').replaceAll('-', ' ');
   const method = payLabel[String(order.payment_method ?? 'cash')] ?? String(order.payment_method ?? '—');
   const paid = order.status === 'completed';

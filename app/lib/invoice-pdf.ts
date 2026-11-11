@@ -1,3 +1,4 @@
+import { displayDate } from './display-date';
 import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont } from 'pdf-lib';
 import type { InvoiceOrder } from './invoice';
 import { LOGO_PNG_BASE64 } from './logo-base64';
@@ -29,10 +30,10 @@ export async function generateInvoicePdf(order: InvoiceOrder): Promise<Uint8Arra
   const quantity = Math.max(1, Number(order.quantity || 1));
   const unit = (Number(order.total || 0) / quantity).toFixed(2);
   const tourName = String(order.tour_slug || '').replaceAll('-', ' ');
-  const tourDate = order.tour_date ? String(order.tour_date).slice(0, 10) : '—';
+  const tourDate = order.tour_date ? displayDate(String(order.tour_date)) : '—';
   const method = payLabel[String(order.payment_method ?? 'cash')] ?? String(order.payment_method ?? '—');
   const paid = order.status === 'completed';
-  const issued = new Date().toLocaleDateString('es-PA', { year: 'numeric', month: 'long', day: 'numeric' });
+  const issued = displayDate(new Date().toISOString());
   const priceMode = order.price_mode === 'group' ? ' / grupo' : order.price_mode === 'both' ? '' : ' / persona';
 
   // ── Header ─────────────────────────────────────────────
