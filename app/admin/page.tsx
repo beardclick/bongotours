@@ -9,5 +9,5 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
   }
   const user=await requireChatGPTAdmin(params.size?`/admin?${params}`:'/admin');
   await syncUserProfile({id:user.userId,email:user.email,user_metadata:{full_name:user.fullName??user.displayName}});
-  return <><AdminDashboard signOutPath={chatGPTSignOutPath('/')}/><WelcomeToast name={user.displayName}/></>;
+  return <><AdminDashboard signOutPath={chatGPTSignOutPath('/')} userName={user.displayName}/><WelcomeToast name={user.displayName}/></>;
 }
