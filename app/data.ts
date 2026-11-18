@@ -2,6 +2,7 @@ export type PriceType = 'person' | 'group';
 export type Tour = {
   slug:string; name:string; h1:string; category:string; location:string;
   price:number; priceType:PriceType; groupPrice?:number; seasonPrices?:string;
+  schemaPriceVerified?:boolean;
   policy?:string; duration:string; difficulty:string; difficultyScore:number;
   capacity:string; minPeople:number; image:string; short:string;
   meetingPoint?:string; departureTime?:string; includes?:string[];

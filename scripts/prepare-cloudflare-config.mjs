@@ -5,6 +5,8 @@ const target=new URL('../dist/server/wrangler.cloudflare.json',import.meta.url);
 const config=JSON.parse(await readFile(source,'utf8'));
 delete config.legacy_env;
 config.name='bongo-outdoors-staging';
+// Pin the production account: never provision resources in the CLI's unrelated default account.
+config.account_id='808b542eb17d1d79c992d8e85164cd26';
 config.d1_databases=[{binding:'DB',database_name:'bongo-outdoors-staging',database_id:'c7b4070b-77f0-4e3c-869f-a37eb84270ce'}];
 config.r2_buckets=[{binding:'FILES',bucket_name:'bongo-outdoors-staging-files'}];
 config.vars={

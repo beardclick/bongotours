@@ -16,7 +16,7 @@ export async function GET() {
       { table:'lodgings', path:'hospedajes', defaults:defaultStays.map(item => item.slug), visible:'active=1' },
       { table:'posts', path:'blog', defaults:['que-llevar-volcan-baru','islas-boca-chica','cafe-geisha'], visible:"status='published'" },
     ];
-    const paths = new Set(['/', '/tours', '/servicios', '/hospedajes', '/blog', '/faqs', '/contacto', '/politicas', '/responsabilidad-social', '/derechos-de-autor', '/relocation-panama']);
+    const paths = new Set(['/', '/tours', '/servicios', '/hospedajes', '/blog', '/faqs', '/contacto', '/politicas', '/responsabilidad-social', '/derechos-de-autor', '/relocation-panama', '/tramites-de-visa']);
     const deleted = await db.prepare('SELECT entity,content_key FROM content_tombstones').all<{entity:string;content_key:string}>();
     await Promise.all(entities.map(async entity => {
       // Existing unpublished rows must never fall back to their demo version.
@@ -26,6 +26,13 @@ export async function GET() {
       const slugs = [...rows.results.filter(row => row.visible === 1).map(row => row.slug), ...entity.defaults.filter(slug => !existing.has(slug) && !removed.has(slug))];
       for (const slug of slugs) paths.add(`/${entity.path}/${encodeURIComponent(slug)}`);
     }));
+    const disabled = await db.prepare('SELECT path FROM disabled_pages').all<{path:string}>();
+    for (const row of disabled.results) {
+      const prefix = row.path === '/' ? '/' : row.path.replace(/\/+$/, '');
+      for (const path of [...paths]) {
+        if (prefix === '/' ? path === '/' : path === prefix || path.startsWith(`${prefix}/`)) paths.delete(path);
+      }
+    }
     const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...paths].sort().map(path => `  <url><loc>${escapeXml(origin + path)}</loc></url>`).join('\n')}\n</urlset>`;
     return new Response(xml, {headers:{'Content-Type':'application/xml; charset=utf-8','Cache-Control':'no-store'}});
   } catch (error) {

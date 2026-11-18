@@ -1,0 +1,25 @@
+export type VisaQuestion = { id: string; label: string; kind: 'text' | 'textarea' };
+
+export const visaQuestions: VisaQuestion[] = [
+  { id: 'q01', kind: 'text', label: 'Apellidos y nombres completos, tal como aparecen en su pasaporte.' },
+  { id: 'q02', kind: 'textarea', label: 'Estado civil (soltero/a, casado, unido, viudo, separado o divorciado). Si es casado, unido, viudo, separado o divorciado, indique: nombre completo de la pareja, fecha de nacimiento y ciudad y país donde nació. Si está divorciado, indique las fechas de matrimonio y divorcio y el motivo de la separación.' },
+  { id: 'q03', kind: 'text', label: 'Fecha de nacimiento (día, mes y año).' },
+  { id: 'q04', kind: 'text', label: 'Lugar de nacimiento: ciudad, estado o provincia y país.' },
+  { id: 'q05', kind: 'text', label: 'Número de identificación personal.' },
+  { id: 'q06', kind: 'textarea', label: '¿Ha tenido otra nacionalidad aparte de su país de nacimiento? Especifique.' },
+  { id: 'q07', kind: 'text', label: '¿Qué tipo de visa va a tramitar?' },
+  { id: 'q08', kind: 'text', label: 'Fecha de viaje y cuánto tiempo se quedará en USA.' },
+  { id: 'q09', kind: 'textarea', label: 'Dirección completa donde se hospedará en USA.' },
+  { id: 'q10', kind: 'textarea', label: '¿Quién cubre los gastos del viaje? (gastos propios, otra persona o empresa). Si es otra persona: nombre completo, parentesco con usted, teléfono y dirección donde vive.' },
+  { id: 'q11', kind: 'textarea', label: '¿Hay otras personas viajando con usted? Si su respuesta es afirmativa, indique nombre completo y parentesco con usted.' },
+  { id: 'q12', kind: 'textarea', label: 'Historial de viajes y visa a USA: ¿ha visitado USA? Si sí, indique la última vez que viajó (día, mes, año) y cuánto tiempo se quedó. Indique también si tuvo visa (fecha de emisión, tipo B1/B2 u otro y número de visa), si la tramitó en Panamá u otro país, si alguna vez se le perdió o le robaron la visa y si alguna vez le han negado la visa (con el motivo).' },
+  { id: 'q13', kind: 'textarea', label: 'Dirección completa donde usted vive (incluya ciudad y provincia).' },
+  { id: 'q14', kind: 'textarea', label: 'Teléfonos: casa, celular y trabajo. ¿Ha tenido otros teléfonos en los últimos 5 años? Indíquelos.' },
+  { id: 'q15', kind: 'textarea', label: 'Correo electrónico. ¿Ha tenido otros correos electrónicos en los últimos 5 años? Indíquelos.' },
+  { id: 'q16', kind: 'textarea', label: 'Redes sociales y cómo aparece en cada una.' },
+  { id: 'q17', kind: 'textarea', label: 'Pasaporte: número, ciudad/estado/provincia y país donde lo tramitó, fecha de emisión y fecha de expiración. ¿Alguna vez se le ha perdido o le han robado el pasaporte?' },
+  { id: 'q18', kind: 'textarea', label: 'Contacto en USA: nombre completo, parentesco con usted, dirección y teléfono. Si no tiene contacto en USA, indique el nombre del hotel, dirección y teléfono.' },
+  { id: 'q19', kind: 'textarea', label: 'Nombres completos de su padre y su madre, con fecha de nacimiento (día, mes y año).' },
+  { id: 'q20', kind: 'textarea', label: '¿Tiene algún hermano(a), hijo, esposo, padre o madre en USA? Si la respuesta es afirmativa, indique nombre completo, parentesco con usted y si es ciudadano o residente permanente. Si solo tiene abuelos(as), tíos, primos o sobrinos, indique solo sí o no.' },
+  { id: 'q21', kind: 'textarea', label: 'Ocupación y estudios: ocupación principal actual, nombre de la empresa, dirección completa (con ciudad y provincia), cuándo empezó a trabajar, salario mensual y descripción breve de sus deberes. Si actualmente estudia: universidad o colegio, dirección y fecha de inicio. ¿Ha trabajado en los últimos 5 años antes de su trabajo actual? Indique empresa, dirección, teléfono, supervisor, ocupación anterior, fechas de inicio y fin y deberes. ¿Dónde hizo su último estudio? Colegio o universidad, dirección, carrera o bachiller y fechas de inicio y fin. ¿Cuántos idiomas habla? Países que ha visitado en los últimos 5 años. ¿Pertenece a una organización benéfica o club social? ¿Ha tenido habilidad o entrenamiento con armas? ¿Ha cometido algún delito por el cual haya sido condenado (con breve explicación)?' },
+];
